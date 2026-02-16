@@ -1,0 +1,8 @@
+{
+  "id": "session-scorer",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

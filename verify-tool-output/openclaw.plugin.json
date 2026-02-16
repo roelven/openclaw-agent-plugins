@@ -1,0 +1,8 @@
+{
+  "id": "verify-tool-output",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

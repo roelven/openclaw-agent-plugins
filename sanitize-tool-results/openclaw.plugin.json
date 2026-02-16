@@ -1,0 +1,8 @@
+{
+  "id": "sanitize-tool-results",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

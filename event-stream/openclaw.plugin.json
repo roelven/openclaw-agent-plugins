@@ -1,0 +1,19 @@
+{
+  "id": "event-stream",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "default": false,
+        "description": "Enable event streaming over Unix socket"
+      },
+      "socketPath": {
+        "type": "string",
+        "default": "/tmp/openclaw/events.sock",
+        "description": "Path to Unix domain socket"
+      }
+    }
+  }
+}
