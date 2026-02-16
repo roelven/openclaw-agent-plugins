@@ -1,0 +1,16 @@
+{
+  "name": "@roelven/openclaw-sanitize-tool-results",
+  "version": "1.0.0",
+  "description": "OpenClaw plugin that sanitizes tool results — fixes malformed tool blocks, truncates oversized results, strips ANSI codes",
+  "license": "MIT",
+  "author": "Roel van der Ven",
+  "keywords": ["openclaw", "plugin", "sanitize", "tool-results", "agent"],
+  "openclaw": {
+    "extensions": ["./index.ts"],
+    "install": {
+      "npmSpec": "@roelven/openclaw-sanitize-tool-results",
+      "localPath": "extensions/sanitize-tool-results"
+    }
+  },
+  "files": ["index.ts", "openclaw.plugin.json"]
+}

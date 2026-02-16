@@ -1,0 +1,16 @@
+{
+  "name": "@roelven/openclaw-verify-tool-output",
+  "version": "1.0.0",
+  "description": "OpenClaw plugin that injects verification hints into tool results — nudges agents to verify before claiming success",
+  "license": "MIT",
+  "author": "Roel van der Ven",
+  "keywords": ["openclaw", "plugin", "verify", "tool-output", "agent", "hallucination"],
+  "openclaw": {
+    "extensions": ["./index.ts"],
+    "install": {
+      "npmSpec": "@roelven/openclaw-verify-tool-output",
+      "localPath": "extensions/verify-tool-output"
+    }
+  },
+  "files": ["index.ts", "openclaw.plugin.json"]
+}
