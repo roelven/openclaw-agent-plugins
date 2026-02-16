@@ -1,6 +1,6 @@
 {
   "name": "@roelven/openclaw-event-stream",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenClaw plugin that emits real-time JSON events over Unix socket for monitoring and tooling",
   "license": "MIT",
   "author": "Roel van der Ven",
@@ -12,5 +12,5 @@
       "localPath": "extensions/event-stream"
     }
   },
-  "files": ["index.ts", "openclaw.plugin.json"]
+  "files": ["index.ts", "openclaw.plugin.json", "README.md"]
 }
