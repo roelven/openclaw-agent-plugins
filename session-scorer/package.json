@@ -1,6 +1,7 @@
 {
   "name": "@roelven/openclaw-session-scorer",
-  "version": "1.0.1",
+  "version": "1.0.3",
+  "type": "module",
   "description": "OpenClaw plugin that scores sessions on accuracy, completeness, autonomy, and consistency. Includes CLI for trend analysis",
   "license": "MIT",
   "author": "Roel van der Ven",
@@ -13,7 +14,7 @@
     }
   },
   "bin": {
-    "openclaw-scores": "./scores-cli.ts"
+    "openclaw-scores": "bin/openclaw-scores"
   },
-  "files": ["index.ts", "openclaw.plugin.json", "scores-cli.ts", "README.md"]
+  "files": ["index.ts", "openclaw.plugin.json", "bin/openclaw-scores", "README.md"]
 }

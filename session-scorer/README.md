@@ -65,19 +65,19 @@ The plugin ships with a CLI tool for analyzing scores:
 
 ```bash
 # Show 7-day averages
-npx tsx scores-cli.ts summary
+npx openclaw-scores summary
 
 # Show score trend over the last 30 days
-npx tsx scores-cli.ts trend --days 30
+npx openclaw-scores trend --days 30
 
 # Show the 5 worst sessions
-npx tsx scores-cli.ts worst --n 5
+npx openclaw-scores worst --n 5
 ```
 
 All commands support `--json` for machine-readable output:
 
 ```bash
-npx tsx scores-cli.ts summary --json
+npx openclaw-scores summary --json
 ```
 
 Example output:

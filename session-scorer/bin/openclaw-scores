@@ -1,0 +1,177 @@
+#!/usr/bin/env node
+/**
+ * openclaw scores CLI — analyze session quality scores.
+ *
+ * Usage:
+ *   openclaw-scores summary          # 7-day averages
+ *   openclaw-scores trend --days 30  # Score trend over time
+ *   openclaw-scores worst --n 5      # Worst N sessions
+ *
+ * All commands support --json for machine-readable output.
+ */
+
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
+
+const SCORES_DIR = join(homedir(), ".openclaw", "scores");
+
+function loadScores() {
+  try {
+    const files = readdirSync(SCORES_DIR).filter((f) => f.endsWith(".json"));
+    return files
+      .map((f) => {
+        try {
+          return JSON.parse(readFileSync(join(SCORES_DIR, f), "utf-8"));
+        } catch {
+          return null;
+        }
+      })
+      .filter((s) => s !== null)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  } catch {
+    return [];
+  }
+}
+
+function filterByDays(scores, days) {
+  const cutoff = Date.now() - days * 86_400_000;
+  return scores.filter((s) => new Date(s.timestamp).getTime() >= cutoff);
+}
+
+function avg(values) {
+  if (values.length === 0) return 0;
+  return Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100;
+}
+
+function summary(scores, json) {
+  const recent = filterByDays(scores, 7);
+  if (recent.length === 0) {
+    if (json) {
+      console.log(JSON.stringify({ error: "No scores in the last 7 days" }));
+    } else {
+      console.log("No scores in the last 7 days.");
+    }
+    return;
+  }
+
+  const result = {
+    period: "7 days",
+    sessions: recent.length,
+    averages: {
+      overall: avg(recent.map((s) => s.overall)),
+      accuracy: avg(recent.map((s) => s.scores.accuracy)),
+      completeness: avg(recent.map((s) => s.scores.completeness)),
+      autonomy: avg(recent.map((s) => s.scores.autonomy)),
+      consistency: avg(recent.map((s) => s.scores.consistency)),
+    },
+    successRate: avg(recent.map((s) => (s.success ? 1 : 0))),
+  };
+
+  if (json) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log("Session Quality Summary (last 7 days)");
+    console.log("\u2500".repeat(40));
+    console.log(`Sessions scored: ${result.sessions}`);
+    console.log(`Overall:         ${result.averages.overall}`);
+    console.log(`  Accuracy:      ${result.averages.accuracy}`);
+    console.log(`  Completeness:  ${result.averages.completeness}`);
+    console.log(`  Autonomy:      ${result.averages.autonomy}`);
+    console.log(`  Consistency:   ${result.averages.consistency}`);
+    console.log(`Success rate:    ${(result.successRate * 100).toFixed(0)}%`);
+  }
+}
+
+function trend(scores, days, json) {
+  const recent = filterByDays(scores, days);
+  if (recent.length === 0) {
+    if (json) {
+      console.log(JSON.stringify({ error: `No scores in the last ${days} days` }));
+    } else {
+      console.log(`No scores in the last ${days} days.`);
+    }
+    return;
+  }
+
+  const byDate = new Map();
+  for (const s of recent) {
+    const date = s.timestamp.slice(0, 10);
+    if (!byDate.has(date)) byDate.set(date, []);
+    byDate.get(date).push(s);
+  }
+
+  const trendData = [...byDate.entries()].map(([date, dayScores]) => ({
+    date,
+    sessions: dayScores.length,
+    overall: avg(dayScores.map((s) => s.overall)),
+    accuracy: avg(dayScores.map((s) => s.scores.accuracy)),
+    completeness: avg(dayScores.map((s) => s.scores.completeness)),
+    autonomy: avg(dayScores.map((s) => s.scores.autonomy)),
+    consistency: avg(dayScores.map((s) => s.scores.consistency)),
+  }));
+
+  if (json) {
+    console.log(JSON.stringify({ period: `${days} days`, trend: trendData }, null, 2));
+  } else {
+    console.log(`Score Trend (last ${days} days)`);
+    console.log("\u2500".repeat(60));
+    console.log("Date         Sessions  Overall  Acc   Comp  Auto  Cons");
+    for (const d of trendData) {
+      console.log(
+        `${d.date}   ${String(d.sessions).padStart(4)}     ${d.overall.toFixed(2).padStart(5)}  ${d.accuracy.toFixed(2).padStart(5)} ${d.completeness.toFixed(2).padStart(5)} ${d.autonomy.toFixed(2).padStart(5)} ${d.consistency.toFixed(2).padStart(5)}`,
+      );
+    }
+  }
+}
+
+function worst(scores, n, json) {
+  const sorted = [...scores].sort((a, b) => a.overall - b.overall).slice(0, n);
+
+  if (sorted.length === 0) {
+    if (json) {
+      console.log(JSON.stringify({ error: "No scores found" }));
+    } else {
+      console.log("No scores found.");
+    }
+    return;
+  }
+
+  if (json) {
+    console.log(JSON.stringify({ worst: sorted }, null, 2));
+  } else {
+    console.log(`Worst ${n} Sessions`);
+    console.log("\u2500".repeat(70));
+    for (const s of sorted) {
+      const date = s.timestamp.slice(0, 16).replace("T", " ");
+      console.log(
+        `${date}  overall=${s.overall}  acc=${s.scores.accuracy} comp=${s.scores.completeness} auto=${s.scores.autonomy} cons=${s.scores.consistency}  [${s.sessionId.slice(0, 8)}]`,
+      );
+    }
+  }
+}
+
+const args = process.argv.slice(2);
+const command = args[0];
+const jsonFlag = args.includes("--json");
+const daysIdx = args.indexOf("--days");
+const days = daysIdx >= 0 ? parseInt(args[daysIdx + 1], 10) || 30 : 30;
+const nIdx = args.indexOf("--n");
+const n = nIdx >= 0 ? parseInt(args[nIdx + 1], 10) || 5 : 5;
+
+const scores = loadScores();
+
+switch (command) {
+  case "summary":
+    summary(scores, jsonFlag);
+    break;
+  case "trend":
+    trend(scores, days, jsonFlag);
+    break;
+  case "worst":
+    worst(scores, n, jsonFlag);
+    break;
+  default:
+    console.log("Usage: openclaw-scores <summary|trend|worst> [--json] [--days N] [--n N]");
+    process.exit(1);
+}
