@@ -39,6 +39,39 @@ Events: `tool.call`, `tool.result`, `session.end`
 
 Listen with: `socat - UNIX-CONNECT:/tmp/openclaw/events.sock`
 
+### vector-memory
+Local vector-based memory with automatic fact extraction and context injection using Ollama embeddings.
+
+**Features:**
+- Semantic memory search via `before_agent_start` hook
+- Automatic fact extraction from tool results and sessions
+- Local-first: Ollama + node:sqlite (no external deps)
+
+**Requirements:**
+- Node.js 22+ (for `node:sqlite`)
+- Ollama with `nomic-embed-text` model
+
+**Installation:**
+```bash
+# Pull the embedding model
+ollama pull nomic-embed-text
+
+# Copy plugin
+cp -r vector-memory ~/.openclaw/extensions/
+
+# Register in ~/.openclaw/openclaw.json:
+{
+  "plugins": {
+    "slots": { "memory": "vector-memory" },
+    "entries": {
+      "vector-memory": { "enabled": true }
+    }
+  }
+}
+```
+
+See [vector-memory/README.md](vector-memory/README.md) for full documentation.
+
 ## Installation
 
 Copy a plugin directory to your OpenClaw extensions folder and register it:
